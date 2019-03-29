@@ -18,7 +18,7 @@
   lineinfile:
     dest: /etc/ssh/sshd_config
     regexp: '^Subsystem(\s+)sftp'
-    line: "Subsystem sftp internal-sftp -f AUTH -l VERBOSE"
+    line: "Subsystem sftp internal-sftp -f AUTH -l {{ sftp_logging_mode }}"
     state: present
   notify: SFTP-Server | Restart sshd
 
@@ -47,7 +47,7 @@
           ChrootDirectory %h
           AllowTCPForwarding no
           X11Forwarding no
-          ForceCommand internal-sftp {{ sftp_enable_logging | ternary('-l VERBOSE', '') }}
+          ForceCommand internal-sftp {{ sftp_enable_logging | ternary('-l ' + sftp_logging_mode, '') }}
           PasswordAuthentication {{ sftp_allow_passwords | ternary('yes', 'no') }}
   notify: SFTP-Server | Restart sshd
 
@@ -121,13 +121,13 @@
     state: directory
   with_subelements:
     - "{{ _sftp_users }}"
-    - "sftp_directories"
+    - "{{ sftp_directories }}"
     - flags:
       skip_missing: True
 
 - name: SFTP-Server | Create dev directory for logging
   file:
-    path: "{{ item[0].home }}/dev"
+    path: "{{ item.home }}/dev"
     owner: root
     group: root
     state: directory
