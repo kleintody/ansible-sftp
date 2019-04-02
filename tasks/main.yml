@@ -121,7 +121,7 @@
     state: directory
   with_subelements:
     - "{{ _sftp_users }}"
-    - "{{ sftp_directories }}"
+    - sftp_directories
     - flags:
       skip_missing: True
 
